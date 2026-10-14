@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grahms TTS Dashboard</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; padding: 20px; max-width: 600px; margin: auto; }
+        textarea { width: 100%; height: 120px; background: #1e1e1e; color: #fff; border: 1px solid #333; padding: 10px; border-radius: 5px; }
+        button { background: #4f46e5; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #4338ca; }
+        audio { margin-top: 20px; width: 100%; }
+    </style>
+</head>
+<body>
+    <h2>🎙️ Grahms TTS Engine</h2>
+    <textarea id="textInput" placeholder="Type text to synthesize..."></textarea>
+    <br>
+    <button onclick="generateSpeech()">Generate Audio</button>
+    <br><br>
+    <audio id="audioPlayer" controls style="display:none;"></audio>
+
+    <script>
+        async function generateSpeech() {
+            const text = document.getElementById('textInput').value;
+            if (!text) return alert("Please enter some text!");
+
+            const btn = document.querySelector('button');
+            btn.innerText = "Synthesizing...";
+
+            const res = await fetch('/api/tts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+
+            if (res.ok) {
+                const blob = await res.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                const player = document.getElementById('audioPlayer');
+                player.src = audioUrl;
+                player.style.display = 'block';
+                player.play();
+            } else {
+                const err = await res.json();
+                alert("Error: " + JSON.stringify(err));
+            }
+            btn.innerText = "Generate Audio";
+        }
+    </script>
+</body>
+</html>
+
